@@ -41,7 +41,6 @@ self.addEventListener("activate", function (evt) {
 
 // fetch
 self.addEventListener("fetch", function (evt) {
-  // cache successful requests to the API
   if (evt.request.url.includes("/api/")) {
     evt.respondWith(
       caches
@@ -49,28 +48,51 @@ self.addEventListener("fetch", function (evt) {
         .then((cache) => {
           return fetch(evt.request)
             .then((response) => {
-              // If the response was good, clone it and store it in the cache.
               if (response.status === 200) {
                 cache.put(evt.request.url, response.clone());
               }
-
               return response;
             })
             .catch((err) => {
-              // Network request failed, try to get it from the cache.
               return cache.match(evt.request);
             });
         })
         .catch((err) => console.log(err))
     );
-
     return;
   }
-
-  // if the request is not for the API, serve static assets using "offline-first" approach.
   evt.respondWith(
     caches.match(evt.request).then(function (response) {
       return response || fetch(evt.request);
     })
   );
 });
+
+/// ------ Refactor
+// self.addEventListener("fetch", async function (evt) {
+//   console.log("IN FETCH REQUEST");
+//   if (evt.request.url.includes("/api/")) {
+//     try {
+//       conosle.log("IN FIREST TRY CATCH");
+//       var cache = await evt.respondWith(caches.open(DATA_CACHE_NAME));
+//       var response = await fetch(evt.request);
+//       if (response.status === 200) {
+//         cache.put(evt.request.url, response.clone());
+//       }
+//       return response;
+//     } catch (err) {
+//       console.log("IN ERROR");
+//       return cache.match(evt.request);
+//     }
+//   } else {
+//     console.log("IN ELSE STATEMENT");
+//     const cashedResponse = await evt.respondWith(caches.match(evt.request));
+//     console.log("++++++++");
+//     console.log(cashedResponse);
+//     console.log("++++++++");
+//     if (cashedResponse) {
+//       console.log("IN CAchedRespose");
+//       return cashedResponse || fetch(evt.request);
+//     }
+//   }
+// });
