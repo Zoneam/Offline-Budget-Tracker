@@ -13,7 +13,7 @@ request.onsuccess = (e) => {
   }
 };
 
-request.onerror = function (event) {
+request.onerror = () => {
   console.log("Database Error");
 };
 
